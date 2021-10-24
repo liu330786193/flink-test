@@ -2,7 +2,6 @@ package com.lyl.flink.test4;
 
 import com.lyl.flink.bean.OrderEvent;
 import com.lyl.flink.bean.TxEvent;
-import com.lyl.flink.bean.UserBehavior;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -11,14 +10,10 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
 
-import javax.jdo.annotations.Order;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author lyl
@@ -70,6 +65,7 @@ public class Flink04_Practice_OrderReceipt {
         SingleOutputStreamOperator<Tuple2<OrderEvent, TxEvent>> result = connectedStreams.process(new MyCoKeyedProcessFunc());
 
         result.print();
+
         env.execute();
 
     }
