@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -20,7 +21,7 @@ import java.time.Duration;
  * @description: TODO
  * @date 2021/10/24 12:36
  */
-public class Flink01_WindowEventTimeTumbling {
+public class Flink02_Window_EventTimeSession {
 
     public static void main(String[] args) throws Exception {
 
@@ -50,19 +51,14 @@ public class Flink01_WindowEventTimeTumbling {
         KeyedStream<WaterSensor, Integer> waterSensorIntegerKeyedStream = waterSensorSingleOutputStreamOperator.keyBy(WaterSensor::getId);
 
         //5 开窗 允许迟到数据，侧输出流
-        WindowedStream<WaterSensor, Integer, TimeWindow> window = waterSensorIntegerKeyedStream.window(TumblingEventTimeWindows.of(Time.seconds(5L)))
-                .allowedLateness(Time.seconds(2L))
-                .sideOutputLateData(new OutputTag<WaterSensor>("side"){});
+        WindowedStream<WaterSensor, Integer, TimeWindow> window = waterSensorIntegerKeyedStream.window(EventTimeSessionWindows.withGap(Time.seconds(5)));
 
 
         //6 计算总和
         SingleOutputStreamOperator<WaterSensor> result = window.sum("vc");
-        DataStream<WaterSensor> sideOutput = result.getSideOutput(new OutputTag<WaterSensor>("side") {
-        });
 
         //7 打印
         result.print();
-        sideOutput.print("side");
 
         //执行任务
         env.execute();
